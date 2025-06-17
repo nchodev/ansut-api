@@ -26,86 +26,116 @@
   </head>
   <body class="text-gray-900 bg-gradient-to-b from-pink-50 via-purple-50 to-white">
 
+    <!-- Header -->
+    <header class="bg-purple-800 text-pink-100 shadow-md sticky top-0 z-50">
+      <nav class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="#" class="text-2xl font-extrabold tracking-wide hover:text-pink-300 transition">Nzassa Girl</a>
+        <ul class="hidden md:flex space-x-8 font-semibold text-pink-200">
+          <li><a href="#hero" class="hover:text-pink-300 transition">Accueil</a></li>
+          <li><a href="#about" class="hover:text-pink-300 transition">À propos</a></li>
+          <li><a href="#features" class="hover:text-pink-300 transition">Fonctionnalités</a></li>
+          <li><a href="#testimonials" class="hover:text-pink-300 transition">Témoignages</a></li>
+          <li><a href="#download" class="hover:text-pink-300 transition">Téléchargement</a></li>
+        </ul>
+        <button
+          class="md:hidden text-pink-200 hover:text-pink-300 focus:outline-none"
+          onclick="document.querySelector('nav ul').classList.toggle('hidden')"
+          aria-label="Menu"
+        >
+          ☰
+        </button>
+      </nav>
+    </header>
+
     <!-- Hero Section -->
-      <section class="relative w-full h-[90vh] overflow-hidden">
-  <div id="carousel" class="relative w-full h-full">
-    <!-- Slide 1 -->
-    <div
-      class="carousel-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100"
-      style="background-image: url('https://images.pexels.com/photos/9879939/pexels-photo-9879939.jpeg?auto=compress&cs=tinysrgb&w=1600');"
-    >
-      <div
-        class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
-      ></div>
+    <section id="hero" class="relative w-full h-[90vh] overflow-hidden">
+      <div id="carousel" class="relative w-full h-full">
+        <!-- Slide 1 -->
+        <div
+          class="carousel-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100"
+          style="background-image: url('https://images.pexels.com/photos/9879939/pexels-photo-9879939.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+        >
+          <div
+            class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
+          ></div>
 
-      <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
-        style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
-      >
-        <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
-          Écoute ton corps, il sait souvent ce dont tu as besoin. Prends le temps de l’écouter attentivement, car il te guide vers ce qui est essentiel pour ton bien-être physique et mental.
-        </p>
+          <div
+            class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
+            style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
+          >
+            <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
+              Écoute ton corps, il sait souvent ce dont tu as besoin. Prends le temps de l’écouter attentivement, car il te guide vers ce qui est essentiel pour ton bien-être physique et mental.
+            </p>
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div
+          class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
+          style="background-image: url('https://images.pexels.com/photos/31540033/pexels-photo-31540033.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+        >
+          <div
+            class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
+          ></div>
+
+          <div
+            class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
+            style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
+          >
+            <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
+              Prends soin de toi chaque jour, même pour 5 minutes. Ce petit moment dédié à toi-même peut faire toute la différence dans ta journée et renforcer ta sérénité intérieure.
+            </p>
+          </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div
+          class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
+          style="background-image: url('https://images.pexels.com/photos/32575240/pexels-photo-32575240.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+        >
+          <div
+            class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
+          ></div>
+
+          <div
+            class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
+            style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
+          >
+            <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
+              Ton bien-être est une priorité, pas un luxe. Investir en toi-même chaque jour, c’est t’offrir les clés d’une vie plus épanouie et harmonieuse.
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Slide 2 -->
-    <div
-      class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
-      style="background-image: url('https://images.pexels.com/photos/31540033/pexels-photo-31540033.jpeg?auto=compress&cs=tinysrgb&w=1600');"
-    >
-      <div
-        class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
-      ></div>
-
-      <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
-        style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
+      <!-- Navigation -->
+      <button
+        onclick="prevSlide()"
+        class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-purple-700 text-pink-100 px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition"
+        aria-label="Slide précédente"
       >
-        <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
-          Prends soin de toi chaque jour, même pour 5 minutes. Ce petit moment dédié à toi-même peut faire toute la différence dans ta journée et renforcer ta sérénité intérieure.
-        </p>
-      </div>
-    </div>
-
-    <!-- Slide 3 -->
-    <div
-      class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
-      style="background-image: url('https://images.pexels.com/photos/32575240/pexels-photo-32575240.jpeg?auto=compress&cs=tinysrgb&w=1600');"
-    >
-      <div
-        class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
-      ></div>
-
-      <div
-        class="absolute bottom-10 left-1/2 transform -translate-x-1/2 pb-8 px-4 text-center text-pink-100 z-20 transition duration-700 translate-y-10 opacity-0 animate-fadeInUp"
-        style="animation-fill-mode: forwards; animation-delay: 0.3s; animation-duration: 1s;"
+        ←
+      </button>
+      <button
+        onclick="nextSlide()"
+        class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-purple-700 text-pink-100 px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition"
+        aria-label="Slide suivante"
       >
-        <p class="text-xl max-w-3xl mx-auto drop-shadow-md">
-          Ton bien-être est une priorité, pas un luxe. Investir en toi-même chaque jour, c’est t’offrir les clés d’une vie plus épanouie et harmonieuse.
-        </p>
-      </div>
-    </div>
-  </div>
+        →
+      </button>
+    </section>
 
-  <!-- Navigation -->
-  <button
-    onclick="prevSlide()"
-    class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-purple-700 text-pink-100 px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition"
-    aria-label="Slide précédente"
-  >
-    ←
-  </button>
-  <button
-    onclick="nextSlide()"
-    class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-purple-700 text-pink-100 px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition"
-    aria-label="Slide suivante"
-  >
-    →
-  </button>
-</section>
+    <!-- À propos -->
+    <section id="about" class="py-16 px-6 max-w-5xl mx-auto text-center">
+      <h2 class="text-3xl font-extrabold text-purple-700 mb-6 drop-shadow-md">À propos de Nzassa Girl</h2>
+      <p class="text-lg text-purple-800 max-w-4xl mx-auto leading-relaxed">
+        Nzassa Girl est une application dédiée à accompagner les jeunes filles dans la compréhension et le suivi de leur bien-être féminin.
+        Notre mission est de proposer un espace sécurisé où elles peuvent suivre leur cycle, noter leurs émotions, et recevoir des conseils adaptés pour vivre pleinement leur féminité avec confiance.
+      </p>
+    </section>
 
     <!-- Fonctionnalités -->
-    <section class="py-16 px-6 bg-pink-50">
+    <section id="features" class="py-16 px-6 bg-pink-50">
       <h2 class="text-3xl font-extrabold text-center mb-12 text-purple-700 drop-shadow-md">
         Fonctionnalités clés
       </h2>
@@ -130,38 +160,32 @@
     </section>
 
     <!-- Témoignages -->
-  <section
-  class="py-20 px-6 bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100"
->
-  <h2
-    class="text-3xl font-extrabold mb-12 text-center text-purple-800 drop-shadow-md"
-  >
-    Elles en parlent
-  </h2>
-  <div
-    class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12"
-  >
-    <blockquote
-      class="bg-white/90 backdrop-blur-md rounded-xl p-10 italic shadow-lg hover:shadow-xl transition-shadow duration-300"
-    >
-      <p class="mb-6 text-purple-900 text-lg leading-relaxed">
-        "Grâce à Nzassa Girl, je comprends mieux mon cycle et je me sens accompagnée."
-      </p>
-      <footer class="text-sm font-semibold text-purple-700">— Aïcha, 17 ans</footer>
-    </blockquote>
-    <blockquote
-      class="bg-white/90 backdrop-blur-md rounded-xl p-10 italic shadow-lg hover:shadow-xl transition-shadow duration-300"
-    >
-      <p class="mb-6 text-purple-900 text-lg leading-relaxed">
-        "L’app m’aide à noter mes humeurs, mes douleurs, mes pensées. C’est mon journal secret !"
-      </p>
-      <footer class="text-sm font-semibold text-purple-700">— Diane, 16 ans</footer>
-    </blockquote>
-  </div>
-</section>
+    <section id="testimonials" class="py-20 px-6 bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100">
+      <h2 class="text-3xl font-extrabold mb-12 text-center text-purple-800 drop-shadow-md">
+        Elles en parlent
+      </h2>
+      <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12">
+        <blockquote
+          class="bg-white/90 backdrop-blur-md rounded-xl p-10 italic shadow-lg hover:shadow-xl transition-shadow duration-300"
+        >
+          <p class="mb-6 text-purple-900 text-lg leading-relaxed">
+            "Grâce à Nzassa Girl, je comprends mieux mon cycle et je me sens accompagnée."
+          </p>
+          <footer class="text-sm font-semibold text-purple-700">— Aïcha, 17 ans</footer>
+        </blockquote>
+        <blockquote
+          class="bg-white/90 backdrop-blur-md rounded-xl p-10 italic shadow-lg hover:shadow-xl transition-shadow duration-300"
+        >
+          <p class="mb-6 text-purple-900 text-lg leading-relaxed">
+            "L’app m’aide à noter mes humeurs, mes douleurs, mes pensées. C’est mon journal secret !"
+          </p>
+          <footer class="text-sm font-semibold text-purple-700">— Diane, 16 ans</footer>
+        </blockquote>
+      </div>
+    </section>
 
     <!-- CTA final -->
-    <section class="bg-gradient-to-r from-pink-400 via-purple-600 to-purple-800 py-20 text-center text-white">
+    <section id="download" class="bg-gradient-to-r from-pink-400 via-purple-600 to-purple-800 py-20 text-center text-white">
       <h2 class="text-3xl font-extrabold mb-6 drop-shadow-lg">Rejoins la communauté Nzassa Girl !</h2>
       <p class="mb-8 text-lg drop-shadow-md">
         Télécharge l’app dès aujourd’hui et commence ton voyage vers le bien-être féminin.

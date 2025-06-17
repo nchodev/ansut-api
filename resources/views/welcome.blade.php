@@ -32,7 +32,7 @@
     <!-- Slide 1 -->
     <div
       class="carousel-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100"
-      style="background-image: url('https://images.pexels.com/photos/19986548/pexels-photo-19986548/free-photo-of-etre-assis-table-portrait-garcons.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+      style="background-image: url('https://images.pexels.com/photos/9879939/pexels-photo-9879939.jpeg?auto=compress&cs=tinysrgb&w=1600');"
     >
       <div
         class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
@@ -51,7 +51,7 @@
     <!-- Slide 2 -->
     <div
       class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
-      style="background-image: url('https://images.pexels.com/photos/20333030/pexels-photo-20333030/free-photo-of-amis-heureux-joyeux-content.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+      style="background-image: url('https://images.pexels.com/photos/31540033/pexels-photo-31540033.jpeg?auto=compress&cs=tinysrgb&w=1600');"
     >
       <div
         class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"
@@ -70,7 +70,7 @@
     <!-- Slide 3 -->
     <div
       class="carousel-slide absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-1000 hidden"
-      style="background-image: url('https://images.pexels.com/photos/3213283/pexels-photo-3213283.jpeg?auto=compress&cs=tinysrgb&w=1600');"
+      style="background-image: url('https://images.pexels.com/photos/32575240/pexels-photo-32575240.jpeg?auto=compress&cs=tinysrgb&w=1600');"
     >
       <div
         class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-purple-900/90 to-transparent z-10"

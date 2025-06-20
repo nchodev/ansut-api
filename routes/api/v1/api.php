@@ -8,6 +8,7 @@ Route::group(['namespace'=>'Api\V1'], function(){
 
     Route::group(['prefix'=>'auth','namespace'=>'Auth'], function(){
             Route::post('/register','AuthController@register');
+            Route::post('/register-with-oauth','AuthController@registerWithOAuth');
             Route::post('/login','AuthController@login');
             Route::post('/logout','AuthController@logout')->middleware('auth:sanctum');
     });

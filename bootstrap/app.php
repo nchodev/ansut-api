@@ -9,6 +9,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
+use App\Http\Middleware\LocalizationApiMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -39,7 +40,10 @@ return Application::configure(basePath: dirname(__DIR__))
                      'abilities' => CheckAbilities::class,
                     // 'ability' => CheckForAnyAbility::class,
                 ]);
-      
+             // Middlewares pour les routes API
+        $middleware->api(prepend: [
+            LocalizationApiMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
                $exceptions->render(function (AuthenticationException $e, Request $request) {

@@ -21,10 +21,19 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'nick_name',
         'full_name',
         'email',
+        'phone_number',
+        'date_of_birth',
+        'login_provider',
+        'provider_id',
+        'status',
+        'email_verified_at',
+        'profile_picture',
         'password',
+        'lang', // URL CDN ou locale
+        'last_login_at',
+        'username', // Pseudo pour login via pseudo
     ];
 
     /**

@@ -11,19 +11,42 @@ return new class extends Migration
      */
     public function up(): void
     {
+        
+      
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
-            $table->string('nick_name');
-            $table->string('email')->unique();
+            $table->string('username')->unique()->nullable()->index(); // login via pseudo
+
+            // Email & téléphone (nullable pour les users OAuth ou login téléphone uniquement)
+            $table->string('email')->unique()->nullable();
+            $table->string('phone_number')->unique()->nullable()->index();
+
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable()->index();
+
+            $table->date('date_of_birth')->nullable();
+
+            // OAuth
+            $table->string('login_provider')->nullable()->index();    // ex: google, facebook
+            $table->string('provider_id')->nullable()->index();       // ID chez le provider
+
+            // Ajoute une contrainte d’unicité combinée pour éviter doublons OAuth
+            $table->unique(['login_provider', 'provider_id']);
+
+            // Statut utilisateur
+            $table->tinyInteger('status')->default(0)->index(); 
+            $table->string('profile_picture')->nullable();   
+            $table->string('lang');      // URL CDN ou locale
+            $table->timestamp('last_login_at')->nullable();           // Pour journal d'activité
+
             $table->rememberToken();
             $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('email')->unique()->nullable(); // Pour les utilisateurs qui se connectent par email
+            $table->string('phone')->unique()->nullable(); // Pour les utilisateurs qui se connectent par téléphone
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });

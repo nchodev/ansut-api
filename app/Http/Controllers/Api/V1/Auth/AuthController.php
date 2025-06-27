@@ -10,6 +10,12 @@ use App\Utils\Helpers;
 use App\Http\Resources\LiveTypeResource;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\LiveStreamResource;
+use App\Http\Resources\UserResource;
+use App\Models\City;
+use App\Models\Grade;
+use App\Models\MotherTongue;
+use App\Models\School;
+use App\Models\SocialStatut;
 use Illuminate\Validation\ValidationException;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\App;
@@ -26,16 +32,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string|max:255',
-            'date_of_bith' => 'required|string|max:255',
+            'social' => 'required|string|max:255',
+            'birthdate' => 'required|string|max:255',
             'city' => 'required',
-            'class_level' => 'required',
+            'grade' => 'required',
             'school' => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => Helpers::error_processor($validator)
+                'errors' => Helpers::error_processor($validator)
             ], 403);
         }
 
@@ -66,7 +72,7 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => Helpers::error_processor($validator)
+                'errors' => Helpers::error_processor($validator)
             ], 403);
         }
         
@@ -114,6 +120,7 @@ class AuthController extends Controller
                         'login_provider'      => $provider,
                         'lang' => $lang, // Utilise la locale de l'en-tête ou la locale par défaut
                         'provider_id'   => $unique_id,
+                        'status'=>0
                     ]);
                 } else {
                     // Met à jour les infos d'OAuth si le user existe par email
@@ -130,7 +137,7 @@ class AuthController extends Controller
             // Création d’un token Laravel Sanctum ou Passport
         $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ], 200);
     }   
@@ -146,7 +153,7 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => Helpers::error_processor($validator)
+                'errors' => Helpers::error_processor($validator)
             ], 403);
         }
         $lang = $request->header('x-localization');
@@ -240,7 +247,7 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
-                'error' => [
+                'errors' => [
                     [
                         'code' => 'auth',
                         'message' => 'invalid credentials',
@@ -259,7 +266,113 @@ class AuthController extends Controller
             'token' => $token,
         ], 200);
     }
+    public function sendSocialRegisterOTP(Request $request)
+    {
 
+        if ( empty($request['phone'])) {
+            return response()->json([ 'message' => 'Le numéro de téléphone est réquis.',
+            ], 403);
+        }
+
+        if (!empty($request['phone'])) {
+           $user =User::where('phone_number',$request['phone'])->first();
+            if($user)
+            {
+              return response()->json([ 'message' => 'Le numéro de téléphone est déjà utilisé.'], 403); 
+            }
+
+            $otp = rand(100000, 999999);
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['phone' => $request['phone']],
+                ['token' => $otp, 'created_at' => now()]
+            );
+        }
+            // Send OTP via SMS here
+            return response()->json([
+                'status' => 1,
+                'otp' => $otp,
+                'message' => 'OTP sent to your phone number.',
+            ], 200);
+        
+    }
+    public function verifyOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|numeric',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => Helpers::error_processor($validator)
+            ], 403);
+        }
+
+        $validated = $validator->validated();
+
+        if (isset($validated['email'])) {
+            $record = DB::table('password_reset_tokens')
+                ->where('email', $validated['email'])
+                ->where('token', $validated['otp'])
+                ->first();
+        } elseif (isset($validated['phone'])) {
+            $record = DB::table('password_reset_tokens')
+                ->where('phone', $validated['phone'])
+                ->where('token', $validated['otp'])
+                ->first();
+        } else {
+            return response()->json([
+                'errors' => [
+                    [
+                        'code' => 'otp',
+                        'message' => 'Email or phone is required.'
+                    ]
+                ]
+            ], 403);
+        }
+
+        if (!$record) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'code' => 'otp',
+                        'message' => 'Invalid OTP.'
+                    ]
+                ]
+            ], 401);
+        }
+       
+        // Optionally, check OTP expiration here
+
+        // OTP is valid, you can delete it if you want
+        if (isset($validated['email'])) {
+            DB::table('password_reset_tokens')->where('email', $validated['email'])->delete();
+        } else {
+            DB::table('password_reset_tokens')->where('phone', $validated['phone'])->delete();
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'OTP verified successfully.'
+        ], 200);
+    }
+   public function update_cm_firebase_token(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'cm_firebase_token' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => Helpers::error_processor($validator)], 403);
+        }
+
+        DB::table('users')->where('id',$request->user()->id)->update([
+            'fcm_token'=>$request['cm_firebase_token']
+        ]);
+
+        return response()->json(['message' => 'mise à jour réussie!'], 200);
+    }
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
@@ -269,5 +382,60 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    // get city
+    public function getCities()
+    {
+        $cities = City::Active()->get();
+        return response()->json([
+            'cities' => $cities
+        ], 200);
+    }
+    // get school by cityId
+    public function getSchoolById($id)
+    {
+
+        $schools = School::Active()->where('city_id', $id)->get();
+
+        return response()->json([
+            'schools' => $schools
+        ], 200);
+    }
+    // get grade by school id
+    public function getSchoolGrades($id)
+    {
+    
+        $grades = Grade::Active()->where('school_id', $id)->get();
+        if (!$grades) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'code' => 'school',
+                        'message' => 'School not found.'
+                    ]
+                ]
+            ], 404);
+        }
+
+        return response()->json([
+            'grades' => $grades
+        ], 200);
+    }
+    // get social statut
+    public function getSocialStatut(){
+        $social = SocialStatut::Active()->get();
+        return response()->json([
+            'socials'=>$social,
+        ], 200);
+
+    }
+     // get mother tongue
+    public function getMotherTongues(){
+        $social = MotherTongue::Active()->get();
+        return response()->json([
+            'tongues'=>$social,
+        ], 200);
+
     }
 }

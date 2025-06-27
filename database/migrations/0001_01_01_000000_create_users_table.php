@@ -15,24 +15,25 @@ return new class extends Migration
       
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
-            $table->string('username')->unique()->nullable()->index(); // login via pseudo
+            $table->string('full_name')->default('Anonyme');
+            $table->string('username')->default('Anonyme'); // login via pseudo
 
             // Email & téléphone (nullable pour les users OAuth ou login téléphone uniquement)
             $table->string('email')->unique()->nullable();
-            $table->string('phone_number')->unique()->nullable()->index();
+            $table->string('phone_number')->unique()->nullable();
+            $table->string('fcm_token')->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
             $table->string('password')->nullable()->index();
 
             $table->date('date_of_birth')->nullable();
+            $table->string('matricule')->unique()->nullable();
+            $table->string('badge')->nullable();
 
             // OAuth
             $table->string('login_provider')->nullable()->index();    // ex: google, facebook
             $table->string('provider_id')->nullable()->index();       // ID chez le provider
-
-            // Ajoute une contrainte d’unicité combinée pour éviter doublons OAuth
-            $table->unique(['login_provider', 'provider_id']);
 
             // Statut utilisateur
             $table->tinyInteger('status')->default(0)->index(); 

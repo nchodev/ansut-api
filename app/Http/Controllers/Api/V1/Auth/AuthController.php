@@ -7,59 +7,109 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Utils\Helpers;
-use App\Http\Resources\LiveTypeResource;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\LiveStreamResource;
 use App\Http\Resources\UserResource;
 use App\Models\City;
 use App\Models\Grade;
 use App\Models\MotherTongue;
 use App\Models\School;
 use App\Models\SocialStatut;
-use Illuminate\Validation\ValidationException;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use App\Services\TwilioService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OTPmail;
 
 class AuthController extends Controller
 {
     protected $client;
-
-    public function __construct(Client $client)
+    protected TwilioService $twilio;
+    public function __construct(Client $client, TwilioService $twilio)
     {
         $this->client = $client;
+         $this->twilio = $twilio;
+    }
+      public function send(Request $request)
+    {
+       
+            $validator = Validator::make($request->all(), [
+                    'phone' => 'required|string',
+            ]);
+                if ($validator->fails()) {
+                    return response()->json([
+                        'errors' => Helpers::error_processor($validator)
+                    ], 403);
+                }
+
+        $otp = rand(100000, 999999); // ou Str::random(6) pour alphanumérique
+
+        // Envoie du message
+        $this->twilio->sendSms($request->phone, "Votre code OTP est : $otp");
+
+        // Tu peux stocker le code dans la DB ou la session pour vérification plus tard
+        return response()->json(['message' => 'OTP envoyé', 'otp' => $otp]);
     }
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'social' => 'required|string|max:255',
-            'birthdate' => 'required|string|max:255',
-            'city' => 'required',
-            'grade' => 'required',
-            'school' => 'required',
-        ]);
+        DB::beginTransaction();
 
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => Helpers::error_processor($validator)
-            ], 403);
-        }
+        try {
+                $validator = Validator::make($request->all(), [
+                        'social'    => 'required',
+                        'phone'     => 'required_without:email|nullable',
+                        'email'     => 'required_without:phone|nullable|email',
+                        'matricule' => 'required',
+                        'birthdate' => 'required',
+                        'city'      => 'required',
+                        'school'    => 'required',
+                        'grade'     => 'required',
+                        'fullName'  => 'required',
+                        'tongue'    => 'required',
+                        'password' =>  'required'
+                    ]);
 
-        $validated = $validator->validated();
 
-        $user = User::create([
-            'full_name' => $validated['full_name'],
-            'nick_name' => $validated['nick_name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+                if ($validator->fails()) {
+                    return response()->json([
+                        'errors' => Helpers::error_processor($validator)
+                    ], 403);
+                }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $validated = $validator->validated();
+            $lang = $request->header('x-localization')?? 'fr';
+            $user = User::create([
+                'full_name' => $validated['fullName'],
+                'email' => $validated['email'],
+                'phone_number'=>$validated['phone'],
+                'email_verified_at'=>$validated['email']?now():null,
+                'phone_verified_at'=>$validated['phone']?now():null,
+                'password' => bcrypt($validated['password']),
+                'date_of_birth' => $validated['birthdate'],
+                'matricule' => $validated['matricule'],
+                'lang'=>$lang,
+                'status' => 1,
+                'social_statut_id' => $request->social,
+                'city_id' => $request->city,
+                'school_id' => $request->school,
+                'grade_id' => $request->grade,
+                'mother_tongue_id' => $request->tongue
+            ]);
 
-        return response()->json([
-            'user' => $user,
+            $token = $user->createToken('auth_token')->plainTextToken;
+            DB::commit();
+
+           return response()->json([
+            'user' => new UserResource($user->fresh()),
             'token' => $token,
-        ], 201);
+        ], 200);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $e->getMessage(),
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
     public function registerWithOAuth(Request $request)
     {
@@ -125,7 +175,7 @@ class AuthController extends Controller
                 } else {
                     // Met à jour les infos d'OAuth si le user existe par email
                     $user->update([
-                        'provider' => $provider,
+                        'login_provider' => $provider,
                         'provider_id' => $unique_id,
                     ]);
                 }
@@ -145,9 +195,9 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'nullable|string|email',
-            'username' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone'=> 'required_without:email|nullable|max:20',
+            'email'=> 'required_without:phone|nullable|email',
+            // 'username' => 'nullable|string|max:255',
             'password' => 'required|string',
         ]);
 
@@ -161,19 +211,20 @@ class AuthController extends Controller
 
       if(isset($validated['email'])) {
             $user = User::where('email', $validated['email'])->first();
+
             if($user && $user->status == 0) // Vérifie si l'utilisateur est actif
             {
                 // l'utilisateur doit terminer son inscription
                 return response()->json([
                     'status' => $user->status,
                     'message' => 'Vous devez terminer votre inscription avant de vous connecter.',
-                ], 200);
+                ], 403);
             } else if($user && $user->status == 2) // l'utilisateur est banni
             {    
                 return response()->json([
                     'status' => $user->status,
                     'message' => 'Votre compte a été banni. Veuillez contacter le support pour plus d\'informations.',
-                ], 200);
+                ], 403);
             }
             
             if($user && $user->password==null) // Si utilisateur trouvé mais il utilise password pour la connexion     
@@ -193,7 +244,7 @@ class AuthController extends Controller
                     'status' => 3,
                     'otp' => $otp, // Retourne l'OTP pour le test
                     'message' => 'un Otp a été envoyé à votre adresse e-mail pour créer un mot de passe.',
-                ], 200);
+                ], 403);
 
             }
 
@@ -214,13 +265,13 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => $user->status,
                     'message' => 'Vous devez terminer votre inscription avant de vous connecter.',
-                ], 200);
+                ], 403);
             } else if($user && $user->status == 2) // l'utilisateur est banni
             {    
                 return response()->json([
                     'status' => $user->status,
                     'message' => 'Votre compte a été banni. Veuillez contacter le support pour plus d\'informations.',
-                ], 200);
+                ], 403);
             }
             
             if($user && $user->password==null) // Si utilisateur trouvé mais il utilise password pour la connexion     
@@ -233,14 +284,11 @@ class AuthController extends Controller
                     ['token' => $otp, 'created_at' => now()]
                 );
                 // Envoie l'OTP par e-mail
-                // Vous pouvez utiliser un service de notification ou envoyer un e-mail directement
-                // Mail::to($user->email)->send(new OtpMail($otp));
-                // Pour l'exemple, on va juste retourner l'OTP dans la réponse
                 return response()->json([
                     'status' => 3,
                     'otp' => $otp, // Retourne l'OTP pour le test
-                    'message' => 'un Otp a été envoyé à votre adresse e-mail pour créer un mot de passe.',
-                ], 200);
+                    'message' => 'un Otp a été envoyé à votre numero de telephone pour créer un mot de passe.',
+                ], 403);
 
             }
       }
@@ -262,10 +310,45 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ], 200);
     }
+    public function updatePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => Helpers::error_processor($validator)
+            ], 403);
+        }
+
+        $validated = $validator->validated();
+
+        // Vérification OTP
+        if (!empty($validated['email'])) {
+            $user = User::where('email', $validated['email'])->first();
+        } elseif (!empty($validated['phone'])) {
+           
+            $user = User::where('phone_number', $validated['phone'])->first();
+        }
+
+        // Met à jour le mot de passe
+        $user->password = bcrypt($validated['password']);
+        $user->save();
+          $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'user'=>new UserResource($user),
+            'token'=>$token,
+            'message' => 'Mot de passe mis à jour avec succès.'
+        ], 200);
+    }
+    // utilisant google et autre social
     public function sendSocialRegisterOTP(Request $request)
     {
 
@@ -288,11 +371,65 @@ class AuthController extends Controller
             );
         }
             // Send OTP via SMS here
+           // new TwilioService()->sendSms($request['phone'], 'Nzassa Girle : votre code de confirmation est' . $otp . 'Il expirera dans 10 minutes. Ne le communiquez à personne, même à un agent NeedU');
+          // $this->twilio->sendSms($request->phone, "Nzassa Girl, Votre code OTP est : $otp");
             return response()->json([
-                'status' => 1,
-                'otp' => $otp,
-                'message' => 'OTP sent to your phone number.',
+                'otp'=>$otp,
+                'message' => 'OTP envoyé à votre numéro.',
             ], 200);
+        
+    }
+    //utilisant phone ou email
+      public function sendRegisterOTP(Request $request)
+    {
+
+        if ( empty($request['phone']) && empty($request['email'])) {
+            return response()->json([ 'message' => 'Le numéro de téléphone ou eamil est requis.',
+            ], 403);
+        }
+
+        if (!empty($request['phone'])) {
+           $user =User::where('phone_number',$request['phone'])->first();
+            if($user)
+            {
+              return response()->json([ 'message' => 'Le numéro de téléphone est déjà utilisé.'], 403); 
+            }
+
+            $otp = rand(100000, 999999);
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['phone' => $request['phone']],
+                ['token' => $otp, 'created_at' => now()]
+            );
+               // Send OTP via SMS here
+           // new TwilioService()->sendSms($request['phone'], 'Nzassa Girle : votre code de confirmation est' . $otp . 'Il expirera dans 10 minutes. Ne le communiquez à personne, même à un agent NeedU');
+          // $this->twilio->sendSms($request->phone, "Votre code OTP est : $otp");
+            return response()->json([
+                'otp'=>$otp,
+                'message' => 'OTP envoyé à votre numéro.',
+            ], 200);
+        }
+         if (!empty($request['email'])) {
+               $user =User::where('email',$request['email'])->first();
+                if($user)
+                {
+                    return response()->json([ 'message' => "L'eamil est déjà utilisé."], 403); 
+                }
+
+                $otp = rand(100000, 999999);
+                DB::table('password_reset_tokens')->updateOrInsert(
+                    ['email' => $request['email']],
+                    ['token' => $otp, 'created_at' => now()]
+                );
+                    // Send OTP via email here
+               
+                Mail::to($request['email'])->send(new OTPmail($otp));
+                    return response()->json([
+                        'otp'=>$otp,
+                        'message' => 'OTP envoyé à votre email.',
+                    ], 200);
+            }
+         
+           
         
     }
     public function verifyOtp(Request $request)

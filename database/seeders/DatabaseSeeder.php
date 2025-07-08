@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Symptom;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +22,8 @@ class DatabaseSeeder extends Seeder
               GradeSeeder::class,
               MotherTongueSeeder::class,
               SocialStatutSeeder::class,
+              SymptomSeeder::class,
+              AdvisorSeeder::class,
             ]);
         
 

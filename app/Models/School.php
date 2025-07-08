@@ -16,5 +16,19 @@ class School extends Model
     {
         return $query->where('status', 1);
     }
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+    public function advisors()
+    {
+        return $this->belongsToMany(Advisor::class, 'advisor_school');
+    }
+
+     protected $hidden = [
+        'created_at',
+        'updated_at',
+        'status'
+    ];
 
 }

@@ -38,7 +38,13 @@ class User extends Authenticatable
         'role',
          'matricule',
          'badge',
-         'fcm_token'
+         'fcm_token',
+         'social_statut_id',
+         'mother_tongue_id',
+         'grade_id',
+         'city_id',
+         'school_id',
+         'is_period_active'
     ];
     
 
@@ -69,6 +75,7 @@ class User extends Authenticatable
         return $this->belongsTo(City::class);
     }
 
+
     public function school()
     {
         return $this->belongsTo(School::class);
@@ -77,5 +84,13 @@ class User extends Authenticatable
     public function grade()
     {
         return $this->belongsTo(Grade::class);
+    }
+     public function socialStatut()
+    {
+        return $this->belongsTo(SocialStatut::class);
+    }
+    public function motherTongue()
+    {
+        return $this->belongsTo(MotherTongue::class);
     }
 }

@@ -3,12 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\SocialStatut;
-use App\Models\UserCity;
-use App\Models\UserGrade;
-use App\Models\UserMotherTongue;
-use App\Models\UserSchool;
-use App\Models\UserSocialStatut;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\DB;
 use App\Utils\Helpers;
 use Illuminate\Http\Request;
@@ -52,36 +47,19 @@ class UserController extends Controller
                 'date_of_birth' => $validated['birthdate'],
                'phone_verified_at'=>now(),
                 'status' => 1,
+                'social_statut_id' => $request->social,
+                'city_id' => $request->city,
+                'school_id' => $request->school,
+                'grade_id' => $request->grade,
+                'mother_tongue_id' => $request->tongue
             ]);
 
-            UserSocialStatut::updateOrCreate(
-                ['user_id' => $user->id],
-                ['social_statut_id' => $request->social]
-            );
-
-            UserCity::updateOrCreate(
-                ['user_id' => $user->id],
-                ['city_id' => $request->city]
-            );
-
-            UserSchool::updateOrCreate(
-                ['user_id' => $user->id],
-                ['school_id' => $request->school]
-            );
-
-            UserGrade::updateOrCreate(
-                ['user_id' => $user->id],
-                ['grade_id' => $request->grade]
-            );
-            UserMotherTongue::updateOrCreate(
-                ['user_id' => $user->id],
-                ['mother_tongue_id' => $request->tongue]
-            );
 
             DB::commit();
-
+            $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
-                'user' => $user->fresh()
+                'user' => new UserResource($user->fresh()),
+                'token'=>$token,
             ], 200);
 
         } catch (\Throwable $e) {
@@ -91,6 +69,65 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getUserinfo(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié.'
+            ], 401);
+        }
+
+        $user->load([
+            'socialStatut',
+            'city',
+            'school',
+            'grade',
+            'motherTongue'
+        ]);
+
+        return response()->json([
+            'user' => new UserResource($user)
+        ], 200);
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur non authentifié.'
+            ], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => Helpers::error_processor($validator)
+            ], 422);
+        }
+
+        $user->profile_picture= $request->avatar;
+        $user->save();
+         $user->load([
+            'socialStatut',
+            'city',
+            'school',
+            'grade',
+            'motherTongue'
+        ]);
+
+        return response()->json([
+            'message' => 'Avatar mis à jour avec succès.',
+            'user' => new UserResource($user)
+        ], 200);
     }
 
 }
